@@ -1,8 +1,11 @@
 from pathlib import Path
 from typing import Any
-from fastapi import FastAPI, APIRouter, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, APIRouter, HTTPException, Query, Request
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+from app.domains.recipe_repository import RecipeDBRepository
 from app.recipe_data import RECIPES
+from app import deps
 
 from app.dtos.recipe_dtos import (
     RecipeResponse,
@@ -27,20 +30,20 @@ def root(request: Request) -> Any:
     )
 
 
-@router.get("/fart", status_code=200)
-def fart() -> dict[str, int]:
-    return {"ha": 1}
-
-
 @router.get("/recipe/{recipe_id}", status_code=200, response_model=RecipeResponse)
-def fetch_recipe(*, recipe_id: int) -> dict[Any, Any] | None:
-    result = [recipe for recipe in RECIPES if recipe["id"] == recipe_id]
+def fetch_recipe(
+    *,
+    recipe_id: int,
+    db: Session = Depends(deps.get_db),
+) -> RecipeResponse | None:
+    repo = RecipeDBRepository(db)
+    result = repo.get(recipe_id=recipe_id)
 
     if not result:
         raise HTTPException(
             status_code=404, detail=f"Recipe not found for id {recipe_id}"
         )
-    return result[0]
+    return result.to_dto()
 
 
 @router.get("/search/", status_code=200, response_model=RecipeSearchResults)

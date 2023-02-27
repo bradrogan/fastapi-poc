@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "app"
+version = "0.0.1"
+description = "Ultimate FastAPI Tutorial Part 1"
+authors = ["ChristopherGS"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+uvicorn = "^0.20.0"
+fastapi = "^0"
+python-multipart = "~0.0.5"
+pydantic = {extras = ["email"], version = "^1.10.5"}
+jinja2 = "3.0.3"
+sqlalchemy = "^2.0.4"
+alembic = "^1.9.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+ipykernel = "^6.21.2"
+pylint = "^2.16.2"
+
+[tool.pylint.'MESSAGES CONTROL']
+extension-pkg-whitelist = "pydantic"

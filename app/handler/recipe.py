@@ -7,7 +7,7 @@ from app.dto.recipe import (
 )
 from app.service.recipe import RecipeService
 
-recipe_router = APIRouter(tags=["recipes"])
+recipe_router: APIRouter = APIRouter(tags=["recipes"])
 
 
 @recipe_router.get(

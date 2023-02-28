@@ -1,7 +1,6 @@
 from fastapi import APIRouter, FastAPI
 
-from app.handler.recipe import recipe_router
-
+from app.handler import recipe_router, user_router
 
 app: FastAPI = FastAPI(title="Recipe API", openapi_url="/openapi.json")
 
@@ -9,6 +8,7 @@ router: APIRouter = APIRouter()
 
 
 app.include_router(recipe_router)
+app.include_router(user_router)
 
 
 if __name__ == "__main__":

@@ -1,35 +1,67 @@
 from abc import ABC, abstractmethod
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.orm import Session
 from app.db.models import RecipeORM
+from app.deps import get_db
 from app.domains.recipe import Recipe, Recipes
 from app.domains.user import User
 
 
 class RecipeRepositoryInterface(ABC):
-    def __init__(self, database: Session) -> None:
+    def __init__(self, database: Session = Depends(get_db)) -> None:
         self.database: Session = database
 
     @abstractmethod
-    def get(self, recipe_id: int) -> Recipe | None:
-        pass
+    def get_by_id(self, recipe_id: int) -> Recipe | None:
+        ...
+
+    @abstractmethod
+    def all(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> Recipes | None:
+        ...
 
     @abstractmethod
     def get_user_recipes(self, user: User) -> Recipes | None:
-        pass
+        ...
 
     @abstractmethod
     def create(self, recipe: Recipe) -> Recipe:
-        pass
+        ...
+
+    @abstractmethod
+    def search(
+        self,
+        keyword: str,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> Recipes | None:
+        ...
 
 
 class RecipeDBRepository(RecipeRepositoryInterface):
-    def get(self, recipe_id: int) -> Recipe | None:
+    def get_by_id(self, recipe_id: int) -> Recipe | None:
         recipe: RecipeORM | None = (
             self.database.query(RecipeORM).filter(RecipeORM.id == recipe_id).first()
         )
         return Recipe.from_orm(recipe) if recipe else None
+
+    def all(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> Recipes | None:
+        recipes: list[RecipeORM] | None = list(
+            self.database.query(RecipeORM)
+            .offset(offset=offset)
+            .limit(limit=limit)
+            .all()
+        )
+        return Recipes.from_orm(recipes) if recipes else None
 
     def create(self, recipe: Recipe) -> Recipe:
         data = jsonable_encoder(recipe)
@@ -42,5 +74,20 @@ class RecipeDBRepository(RecipeRepositoryInterface):
     def get_user_recipes(self, user: User) -> Recipes | None:
         recipes: list[RecipeORM] | None = list(
             self.database.query(RecipeORM).filter(RecipeORM.id == user.id).all()
+        )
+        return Recipes.from_orm(recipes) if recipes else None
+
+    def search(
+        self,
+        keyword: str,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> Recipes | None:
+        recipes: list[RecipeORM] | None = list(
+            self.database.query(RecipeORM)
+            .filter(RecipeORM.label.ilike(f"%{keyword}%"))
+            .offset(offset=offset)
+            .limit(limit=limit)
+            .all()
         )
         return Recipes.from_orm(recipes) if recipes else None

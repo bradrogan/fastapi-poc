@@ -9,7 +9,7 @@ class RecipeResponse(BaseModel):
     url: HttpUrl
 
 
-class RecipeSearchResults(BaseModel):
+class RecipesResponse(BaseModel):
     results: Sequence[RecipeResponse]
 
 

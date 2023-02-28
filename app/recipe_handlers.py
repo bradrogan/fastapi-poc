@@ -1,15 +1,10 @@
-from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from app import deps
-from app.domains.recipe_repository import RecipeDBRepository
 
 from app.dtos.recipe_dtos import (
     RecipeCreateRequest,
     RecipeResponse,
-    RecipeSearchResults,
+    RecipesResponse,
 )
-from app.recipe_data import RECIPES
 from app.service.recipe_svc import RecipeService
 
 router = APIRouter(tags=["recipes"])
@@ -19,12 +14,9 @@ router = APIRouter(tags=["recipes"])
 def fetch_recipe(
     *,
     recipe_id: int,
-    db: Session = Depends(deps.get_db),
+    recipe_svc: RecipeService = Depends(),
 ) -> RecipeResponse | None:
-    repo: RecipeDBRepository = RecipeDBRepository(db)
-    svc = RecipeService(repo)
-
-    result: RecipeResponse | None = svc.get_by_id(recipe_id=recipe_id)
+    result: RecipeResponse | None = recipe_svc.get_by_id(recipe_id=recipe_id)
 
     if not result:
         raise HTTPException(
@@ -33,30 +25,21 @@ def fetch_recipe(
     return result
 
 
-@router.get("/search/", status_code=200, response_model=RecipeSearchResults)
+@router.get("/search/", status_code=200, response_model=RecipesResponse)
 def search_recipes(
     *,
     keyword: str
     | None = Query(None, description="Search term", min_length=2, example="chicken"),
     max_results: int = 10,
-) -> dict[str, Any]:
-    if not keyword:
-        return {"results": RECIPES[:max_results]}
-
-    results = [
-        recipe for recipe in RECIPES if keyword.lower() in str(recipe["label"]).lower()
-    ]
-
-    return {"results": list(results)[:max_results]}
+    recipe_svc: RecipeService = Depends(),
+) -> RecipesResponse | None:
+    return recipe_svc.search(keyword=keyword, limit=max_results)
 
 
 @router.post("/recipe/", status_code=201, response_model=RecipeResponse)
-def create_recipe(*, recipe_in: RecipeCreateRequest) -> RecipeResponse:
-    i = len(RECIPES) + 1
-    recipe = RecipeResponse(
-        id=i, label=recipe_in.label, source=recipe_in.source, url=recipe_in.url
-    )
-
-    RECIPES.append(recipe.dict())
-
-    return recipe
+def create_recipe(
+    *,
+    recipe_in: RecipeCreateRequest,
+    recipe_svc: RecipeService = Depends(),
+) -> RecipeResponse:
+    return recipe_svc.create(new_recipe=recipe_in)

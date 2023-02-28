@@ -2,7 +2,6 @@
 Database Models
 """
 
-from typing import Optional
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -15,9 +14,9 @@ class RecipeORM(Base):
 
     label: Mapped[str] = mapped_column(String(256), nullable=False)
 
-    url: Mapped[Optional[str]] = mapped_column(String(256), index=True)
-    source: Mapped[Optional[str]] = mapped_column(String(256))
-    submitter_id: Mapped[Optional[str]] = mapped_column(
+    url: Mapped[str | None] = mapped_column(String(256), index=True)
+    source: Mapped[str | None] = mapped_column(String(256))
+    submitter_id: Mapped[str | None] = mapped_column(
         String(10),
         ForeignKey("user.id"),
     )
@@ -34,8 +33,8 @@ class UserORM(Base):
         uselist=True,
     )
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    first_name: Mapped[Optional[str]] = mapped_column(String(256))
-    surname: Mapped[Optional[str]] = mapped_column(String(256))
+    first_name: Mapped[str | None] = mapped_column(String(256))
+    surname: Mapped[str | None] = mapped_column(String(256))
     email: Mapped[str] = mapped_column(index=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
     recipes: Mapped[list["RecipeORM"]] = relationship(

@@ -1,7 +1,7 @@
 from fastapi import Depends
-from app.domains.recipe import Recipe, Recipes
-from app.domains.recipe_repository import RecipeDBRepository, RecipeRepositoryInterface
-from app.dtos.recipe_dtos import RecipeCreateRequest, RecipeResponse, RecipesResponse
+from app.domain.recipe import Recipe, Recipes
+from app.domain.repository.recipe import RecipeDBRepository, RecipeRepositoryInterface
+from app.dto.recipe import RecipeCreateRequest, RecipeResponse, RecipesResponse
 
 
 class RecipeService:

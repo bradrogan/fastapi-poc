@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl
 
-from app.dtos.recipe_dtos import RecipeResponse, RecipesResponse
+from app.dto.recipe import RecipeResponse, RecipesResponse
 
 
 class Recipe(BaseModel):

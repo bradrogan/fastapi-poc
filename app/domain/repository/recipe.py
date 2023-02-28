@@ -5,8 +5,8 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from app.db.models import RecipeORM
 from app.deps import get_db
-from app.domains.recipe import Recipe, Recipes
-from app.domains.user import User
+from app.domain.recipe import Recipe, Recipes
+from app.domain.user import User
 
 
 class RecipeRepositoryInterface(ABC):

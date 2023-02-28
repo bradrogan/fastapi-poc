@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.dtos.recipe_dtos import (
+from app.dto.recipe import (
     RecipeCreateRequest,
     RecipeResponse,
     RecipesResponse,
 )
-from app.service.recipe_svc import RecipeService
+from app.service.recipe import RecipeService
 
 router = APIRouter(tags=["recipes"])
 

@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.orm import Session
 from app.db.models import UserORM
-from app.domains.user import User
+from app.domain.user import User
 
 
 class UserRepositoryInterface(ABC):

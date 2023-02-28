@@ -10,9 +10,6 @@ from app.domain.user import User
 
 
 class RecipeRepositoryInterface(ABC):
-    def __init__(self, database: Session = Depends(get_db)) -> None:
-        self.database: Session = database
-
     @abstractmethod
     def get_by_id(self, recipe_id: int) -> Recipe | None:
         ...
@@ -44,6 +41,9 @@ class RecipeRepositoryInterface(ABC):
 
 
 class RecipeDBRepository(RecipeRepositoryInterface):
+    def __init__(self, database: Session = Depends(get_db)) -> None:
+        self.database: Session = database
+
     def get_by_id(self, recipe_id: int) -> Recipe | None:
         recipe: RecipeORM | None = (
             self.database.query(RecipeORM).filter(RecipeORM.id == recipe_id).first()

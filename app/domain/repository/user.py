@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.orm import Session
 from app.db.models import UserORM
+from app.deps import get_db
 from app.domain.user import User
 
 
 class UserRepositoryInterface(ABC):
-    def __init__(self, database: Session) -> None:
-        self.database: Session = database
-
     @abstractmethod
     def get_by_id(self, user_id: int) -> User | None:
         ...
@@ -24,6 +23,9 @@ class UserRepositoryInterface(ABC):
 
 
 class UserDBRepository(UserRepositoryInterface):
+    def __init__(self, database: Session = Depends(get_db)) -> None:
+        self.database: Session = database
+
     def get_by_id(self, user_id: int) -> User | None:
         user: UserORM | None = (
             self.database.query(UserORM).filter(UserORM.id == user_id).first()

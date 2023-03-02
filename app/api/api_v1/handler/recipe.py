@@ -10,9 +10,7 @@ from app.service.recipe import RecipeService
 recipe_router: APIRouter = APIRouter(tags=["recipes"])
 
 
-@recipe_router.get(
-    "/recipe/{recipe_id}", status_code=200, response_model=RecipeResponse
-)
+@recipe_router.get("/{recipe_id}", status_code=200, response_model=RecipeResponse)
 def fetch_recipe(
     *,
     recipe_id: int,
@@ -38,7 +36,7 @@ def search_recipes(
     return recipe_svc.search(keyword=keyword, limit=max_results)
 
 
-@recipe_router.post("/recipe/", status_code=201, response_model=RecipeResponse)
+@recipe_router.post("/", status_code=201, response_model=RecipeResponse)
 def create_recipe(
     *,
     recipe_in: RecipeCreateRequest,

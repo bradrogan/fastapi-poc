@@ -1,18 +1,22 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
+from app.api.api_v1.api import api_router as api_router_v1
+from app.core.config import settings
 
-from app.handler import recipe_router, user_router
 
 app: FastAPI = FastAPI(title="Recipe API", openapi_url="/openapi.json")
 
-router: APIRouter = APIRouter()
 
-
-app.include_router(recipe_router)
-app.include_router(user_router)
+app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
 
 if __name__ == "__main__":
     # Use this for debugging purposes only
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, log_level="debug", reload=True)
+    uvicorn.run(  # type: ignore
+        "main:app",
+        host="0.0.0.0",
+        port=8001,
+        log_level="debug",
+        reload=True,
+    )

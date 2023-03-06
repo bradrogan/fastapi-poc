@@ -1,3 +1,4 @@
+from enum import StrEnum
 from pydantic import BaseModel, HttpUrl
 
 from app.dto.recipe import RecipeResponse, RecipesResponse
@@ -46,3 +47,11 @@ class Recipes(BaseModel):
         """
 
         orm_mode: bool = True
+
+
+class RedditSort(StrEnum):
+    HOT = "hot"
+    TOP = "top"
+    BEST = "best"
+    RISING = "rising"
+    NEW = "new"

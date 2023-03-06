@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from app.domain.recipe import RedditSort
 
 from app.dto.recipe import (
     RecipeCreateRequest,
     RecipeResponse,
     RecipesResponse,
+    RecipesSocialResponse,
 )
 from app.service.recipe import RecipeService
 
 recipe_router: APIRouter = APIRouter(tags=["recipes"])
 
 
-@recipe_router.get("/{recipe_id}", status_code=200, response_model=RecipeResponse)
+@recipe_router.get("/{recipe_id}", status_code=200)
 def fetch_recipe(
     *,
     recipe_id: int,
@@ -25,7 +27,7 @@ def fetch_recipe(
     return result
 
 
-@recipe_router.get("/search/", status_code=200, response_model=RecipesResponse)
+@recipe_router.get("/search/", status_code=200)
 def search_recipes(
     *,
     keyword: str
@@ -43,3 +45,17 @@ def create_recipe(
     recipe_svc: RecipeService = Depends(),
 ) -> RecipeResponse:
     return recipe_svc.create(new_recipe=recipe_in)
+
+
+@recipe_router.get("/reddit/", status_code=200)
+async def reddit_recipes(
+    *,
+    sort: RedditSort = Query(
+        RedditSort.TOP,
+        description="Reddit sort method (top, hot, best, new)",
+        example="top",
+    ),
+    max_results: int = 3,
+    recipe_svc: RecipeService = Depends(),
+) -> RecipesSocialResponse:
+    return await recipe_svc.get_reddit(sort=sort, limit=max_results)

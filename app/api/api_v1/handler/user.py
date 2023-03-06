@@ -9,7 +9,7 @@ from app.service.user import UserService
 user_router: APIRouter = APIRouter(tags=["users"])
 
 
-@user_router.get("/user/{user_id}", status_code=200, response_model=UserResponse)
+@user_router.get("/user/{user_id}", status_code=200)
 def fetch_user(
     *,
     user_id: int,
@@ -22,7 +22,7 @@ def fetch_user(
     return result
 
 
-@user_router.post("/user/", status_code=201, response_model=UserResponse)
+@user_router.post("/user/", status_code=201)
 def create_user(
     *,
     user_in: UserCreateRequest,

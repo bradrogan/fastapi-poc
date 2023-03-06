@@ -18,3 +18,13 @@ class RecipeCreateRequest(BaseModel):
     source: str
     url: HttpUrl
     submitter_id: int
+
+
+class RecipeSocialResponse(BaseModel):
+    title: str
+    score: int
+    url: HttpUrl
+
+
+class RecipesSocialResponse(BaseModel):
+    results: Sequence[RecipeSocialResponse]

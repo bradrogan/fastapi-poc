@@ -52,10 +52,12 @@ async def reddit_recipes(
     *,
     sort: RedditSort = Query(
         RedditSort.TOP,
-        description="Reddit sort method (top, hot, best, new)",
-        example="top",
+        description="Reddit sort method",
     ),
-    max_results: int = 3,
+    max_results: int = Query(
+        3,
+        description="Maximum number of results per subreddit",
+    ),
     recipe_svc: RecipeService = Depends(),
 ) -> RecipesSocialResponse:
     return await recipe_svc.get_reddit(sort=sort, limit=max_results)

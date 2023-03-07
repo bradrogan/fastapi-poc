@@ -24,6 +24,10 @@ class Settings(BaseSettings):
 
     DB_URI: str = "sqlite:///example.db"
     FIRST_SUPERUSER: EmailStr = EmailStr("admin@recipeapi.com")
+    # 10 days = 10 days * 24 hours * 60 mintues
+    ACCESS_TOKEN_EXPIRY_IN_MINUTES: float = 10 * 24 * 60
+    JWT_SECRET: str = "placeholder secret"
+    JWT_ALGORITHM: str = "HS256"
 
     class Config(BaseSettings.Config):
         case_sensitive: bool = True

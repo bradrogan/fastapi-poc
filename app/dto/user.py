@@ -12,4 +12,9 @@ class UserCreateRequest(BaseModel):
     first_name: str | None = None
     surname: str | None = None
     email: EmailStr
-    is_superuser: bool = False
+    password: str
+
+
+class UserLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

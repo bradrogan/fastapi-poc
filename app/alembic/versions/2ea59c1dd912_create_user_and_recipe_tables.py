@@ -23,7 +23,7 @@ def upgrade() -> None:
         sa.Column("first_name", sa.String(length=256), nullable=True),
         sa.Column("surname", sa.String(length=256), nullable=True),
         sa.Column("email", sa.String(), nullable=False),
-        sa.Column("is_superuser", sa.Boolean(), nullable=True),
+        sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_user_email"), "user", ["email"], unique=False)

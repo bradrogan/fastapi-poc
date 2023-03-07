@@ -1,6 +1,7 @@
 import logging
 from pydantic import EmailStr, HttpUrl
-from app.core.config import Settings
+from app.core.config import settings
+from app.core.security import hash_password
 from app.domain.recipe import Recipe
 from app.domain.repository.recipe import RecipeRepositoryInterface
 from app.domain.user import User
@@ -23,20 +24,21 @@ def init_db(
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line
     # Base.metadata.create_all(bind=engine)
-    if Settings.FIRST_SUPERUSER:
-        user: User | None = user_repo.get_by_email(email=Settings.FIRST_SUPERUSER)
+    if settings.FIRST_SUPERUSER:
+        user: User | None = user_repo.get_by_email(email=settings.FIRST_SUPERUSER)
         if not user:
             user_in = User(
                 id=None,
                 first_name="admin",
-                email=EmailStr(Settings.FIRST_SUPERUSER),
+                email=EmailStr(settings.FIRST_SUPERUSER),
                 is_superuser=True,
+                hashed_password=hash_password("password"),
             )
             user: User | None = user_repo.create(user=user_in)  # noqa: F841
         else:
             logger.warning(
                 "Skipping creating superuser. User with email " "%s already exists. ",
-                Settings.FIRST_SUPERUSER,
+                settings.FIRST_SUPERUSER,
             )
         if not recipe_repo.get_user_recipes(user):
             for recipe in RECIPES:

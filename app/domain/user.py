@@ -8,6 +8,7 @@ class User(BaseModel):
     first_name: str | None = None
     surname: str | None = None
     email: EmailStr
+    hashed_password: str
     is_superuser: bool = False
 
     class Config:

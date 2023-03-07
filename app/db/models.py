@@ -41,3 +41,4 @@ class UserORM(Base):
         cascade="all,delete-orphan",
         back_populates="submitter",
     )
+    hashed_password: Mapped[str]

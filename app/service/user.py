@@ -1,7 +1,10 @@
-from fastapi import Depends, HTTPException
+from typing import Any
+from fastapi import Depends, HTTPException, status
+from jose import jwt
+from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.domain.repository.user import UserDBRepository, UserRepositoryInterface
-from app.domain.user import User
+from app.domain.user import JWTData, User
 from app.dto.user import UserCreateRequest, UserLoginResponse, UserResponse
 
 
@@ -38,16 +41,16 @@ class UserService:
         return self.repo.create(user=user).to_dto()
 
     def login(self, user_name: str, password: str) -> UserLoginResponse:
-        user: User | None = self.authenticate(email=user_name, password=password)
+        user: User | None = self._authenticate(email=user_name, password=password)
 
         if not user:
             raise HTTPException(
                 status_code=400, detail="Incorrect username and passoword."
             )
 
-        return UserLoginResponse(access_token=create_access_token(sub=str(user.id)))
+        return UserLoginResponse(access_token=create_access_token(sub=user.email))
 
-    def authenticate(self, *, email: str, password: str) -> User | None:
+    def _authenticate(self, *, email: str, password: str) -> User | None:
         user: User | None = self.repo.get_by_email(email=email)
 
         if not user:
@@ -60,3 +63,29 @@ class UserService:
             return None
 
         return user
+
+    def get_current_user(self, token: str) -> UserResponse:
+        payload: dict[str, Any] = jwt.decode(
+            token,
+            key=settings.JWT_SECRET,
+            algorithms=settings.JWT_ALGORITHM,
+            options={"verify_aud": False},
+        )
+
+        sub: Any | None = payload.get("sub")
+
+        if not sub:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid JWT."
+            )
+
+        jwt_data: JWTData = JWTData(sub=sub)
+
+        user: User | None = self.repo.get_by_email(email=jwt_data.sub)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+            )
+
+        return user.to_dto()

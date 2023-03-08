@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.domain.recipe import RedditSort
 
 from app.dto.recipe import (
@@ -12,7 +12,7 @@ from app.service.recipe import RecipeService
 recipe_router: APIRouter = APIRouter(tags=["recipes"])
 
 
-@recipe_router.get("/{recipe_id}", status_code=200)
+@recipe_router.get("/{recipe_id}", status_code=status.HTTP_200_OK)
 def fetch_recipe(
     *,
     recipe_id: int,
@@ -22,12 +22,13 @@ def fetch_recipe(
 
     if not result:
         raise HTTPException(
-            status_code=404, detail=f"Recipe not found for id {recipe_id}"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe not found for id {recipe_id}",
         )
     return result
 
 
-@recipe_router.get("/search/", status_code=200)
+@recipe_router.get("/search/", status_code=status.HTTP_200_OK)
 def search_recipes(
     *,
     keyword: str
@@ -38,7 +39,9 @@ def search_recipes(
     return recipe_svc.search(keyword=keyword, limit=max_results)
 
 
-@recipe_router.post("/", status_code=201, response_model=RecipeResponse)
+@recipe_router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=RecipeResponse
+)
 def create_recipe(
     *,
     recipe_in: RecipeCreateRequest,
@@ -47,7 +50,7 @@ def create_recipe(
     return recipe_svc.create(new_recipe=recipe_in)
 
 
-@recipe_router.get("/reddit/", status_code=200)
+@recipe_router.get("/reddit/", status_code=status.HTTP_200_OK)
 async def reddit_recipes(
     *,
     sort: RedditSort = Query(

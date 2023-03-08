@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from app.api.deps import oauth2_scheme
 
 from app.dto.user import (
     UserCreateRequest,
@@ -11,7 +12,7 @@ from app.service.user import UserService
 user_router: APIRouter = APIRouter(tags=["users"])
 
 
-@user_router.get("/user/{user_id}", status_code=200)
+@user_router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
 def fetch_user(
     *,
     user_id: int,
@@ -24,7 +25,7 @@ def fetch_user(
     return result
 
 
-@user_router.post("/signup/", status_code=201)
+@user_router.post("/signup/", status_code=status.HTTP_201_CREATED)
 def create_user(
     *,
     user_in: UserCreateRequest,
@@ -40,3 +41,12 @@ def login(
     user_svc: UserService = Depends(),
 ) -> UserLoginResponse:
     return user_svc.login(form_data.username, password=form_data.password)
+
+
+@user_router.get("/me/", status_code=status.HTTP_200_OK)
+def me(
+    *,
+    token: str = Depends(oauth2_scheme),
+    user_svc: UserService = Depends(),
+) -> UserResponse:
+    return user_svc.get_current_user(token=token)

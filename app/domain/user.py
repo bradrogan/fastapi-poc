@@ -25,3 +25,7 @@ class User(BaseModel):
             surname=self.surname,
             email=self.email,
         )
+
+
+class JWTData(BaseModel):
+    sub: str

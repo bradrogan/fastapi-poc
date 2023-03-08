@@ -1,11 +1,13 @@
 from typing import Any
 from fastapi import Depends, HTTPException, status
 from jose import jwt
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.domain.repository.user import UserDBRepository, UserRepositoryInterface
 from app.domain.user import JWTData, User
 from app.dto.user import UserCreateRequest, UserLoginResponse, UserResponse
+from app.api.deps import oauth2_scheme
 
 
 class UserService:
@@ -20,6 +22,11 @@ class UserService:
 
         return result.to_dto() if result else None
 
+    def get_by_email(self, email: str) -> UserResponse | None:
+        result: User | None = self.repo.get_by_email(email=email)
+
+        return result.to_dto() if result else None
+
     def create(
         self,
         user_in: UserCreateRequest,
@@ -27,7 +34,7 @@ class UserService:
     ) -> UserResponse:
         if self.repo.get_by_email(user_in.email):
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A user with this email address already exists.",
             )
 
@@ -45,7 +52,8 @@ class UserService:
 
         if not user:
             raise HTTPException(
-                status_code=400, detail="Incorrect username and passoword."
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect username and passoword.",
             )
 
         return UserLoginResponse(access_token=create_access_token(sub=user.email))
@@ -64,28 +72,57 @@ class UserService:
 
         return user
 
-    def get_current_user(self, token: str) -> UserResponse:
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    user_svc: UserService = Depends(),
+) -> UserResponse:
+    jwt_data: JWTData = get_jwt_data(token)
+
+    user: UserResponse | None = user_svc.get_by_email(email=jwt_data.sub)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+        )
+
+    return user
+
+
+def get_jwt_data(token: str):
+    try:
         payload: dict[str, Any] = jwt.decode(
             token,
             key=settings.JWT_SECRET,
             algorithms=settings.JWT_ALGORITHM,
             options={"verify_aud": False},
         )
+    except Exception as exception:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Malformed JWT."
+        ) from exception
 
-        sub: Any | None = payload.get("sub")
+    sub: Any | None = payload.get("sub")
 
-        if not sub:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid JWT."
-            )
+    if not sub:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid JWT."
+        )
 
-        jwt_data: JWTData = JWTData(sub=sub)
+    jwt_data: JWTData = JWTData(sub=sub)
+    return jwt_data
 
-        user: User | None = self.repo.get_by_email(email=jwt_data.sub)
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
-            )
+def is_superuser(
+    token: str = Depends(oauth2_scheme),
+    user_svc: UserService = Depends(),
+) -> bool:
+    user: UserResponse = get_current_user(token=token, user_svc=user_svc)
 
-        return user.to_dto()
+    if user.is_super_user:
+        return True
+
+    raise HTTPException(
+        status_code=HTTP_401_UNAUTHORIZED,
+        detail="Your user type does not permit this operation.",
+    )

@@ -8,8 +8,12 @@ from app.dto.recipe import (
     RecipesSocialResponse,
 )
 from app.service.recipe import RecipeService
+from app.service.user import get_current_user
 
-recipe_router: APIRouter = APIRouter(tags=["recipes"])
+recipe_router: APIRouter = APIRouter(
+    tags=["recipes"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @recipe_router.get("/{recipe_id}", status_code=status.HTTP_200_OK)

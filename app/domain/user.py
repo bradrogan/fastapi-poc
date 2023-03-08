@@ -24,6 +24,7 @@ class User(BaseModel):
             first_name=self.first_name,
             surname=self.surname,
             email=self.email,
+            is_super_user=self.is_superuser,
         )
 
 

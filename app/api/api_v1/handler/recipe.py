@@ -8,10 +8,11 @@ from app.dto.recipe import (
     RecipesSocialResponse,
 )
 from app.services.recipe import RecipeService
+from app.services.user import get_current_user
 
 recipe_router: APIRouter = APIRouter(
     tags=["recipes"],
-    # dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(get_current_user)],
 )
 
 

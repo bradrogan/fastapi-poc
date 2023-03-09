@@ -4,8 +4,8 @@ from jose import jwt
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
-from app.domain.repository.user import UserDBRepository, UserRepositoryInterface
-from app.domain.user import JWTData, User
+from app.domains.repositories.user import UserDBRepository, UserRepositoryInterface
+from app.domains.user import JWTData, User
 from app.dto.user import UserCreateRequest, UserLoginResponse, UserResponse
 from app.api.deps import oauth2_scheme
 

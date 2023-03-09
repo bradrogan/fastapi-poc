@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from app.domain.recipe import RedditSort
+from app.domains.recipe import RedditSort
 
 from app.dto.recipe import (
     RecipeCreateRequest,
@@ -7,12 +7,11 @@ from app.dto.recipe import (
     RecipesResponse,
     RecipesSocialResponse,
 )
-from app.service.recipe import RecipeService
-from app.service.user import get_current_user
+from app.services.recipe import RecipeService
 
 recipe_router: APIRouter = APIRouter(
     tags=["recipes"],
-    dependencies=[Depends(get_current_user)],
+    # dependencies=[Depends(get_current_user)],
 )
 
 

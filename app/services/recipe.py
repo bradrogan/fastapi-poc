@@ -1,27 +1,26 @@
-import asyncio
 from fastapi import Depends
-from app.domain.recipe import Recipe, Recipes, RedditSort
-from app.domain.repository.recipe import RecipeDBRepository, RecipeRepositoryInterface
+from app.domains.recipe import Recipe, Recipes, RedditSort
+from app.domains.repositories.recipe import (
+    RecipeDBRepository,
+    RecipeRepositoryInterface,
+)
 from app.dto.recipe import (
     RecipeCreateRequest,
     RecipeResponse,
-    RecipeSocialResponse,
     RecipesResponse,
     RecipesSocialResponse,
 )
-from app.gateway import reddit
+from app.clients.reddit import RedditRecipeClient, RedditRecipeClientInterface
 
 
 class RecipeService:
     def __init__(
         self,
         recipe_repo: RecipeRepositoryInterface = Depends(RecipeDBRepository),
-        reddit_client: reddit.RedditRecipeClientInterface = Depends(
-            reddit.RedditRecipeClient
-        ),
+        reddit_client: RedditRecipeClientInterface = Depends(RedditRecipeClient),
     ) -> None:
         self.repo: RecipeRepositoryInterface = recipe_repo
-        self.reddit = reddit_client
+        self.reddit: RedditRecipeClientInterface = reddit_client
 
     def get_by_id(self, recipe_id: int) -> RecipeResponse | None:
         result: Recipe | None = self.repo.get_by_id(recipe_id=recipe_id)
@@ -53,15 +52,21 @@ class RecipeService:
         sort: RedditSort = RedditSort.TOP,
         limit: int = 3,
     ) -> RecipesSocialResponse:
-        reddit_posts: tuple[
-            RecipesSocialResponse, RecipesSocialResponse
-        ] = await asyncio.gather(
-            self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
-            self.reddit.get_reddit(sub_reddit="easyrecipes", sort=sort, limit=limit),
+        # reddit_posts: tuple[
+        #     RecipesSocialResponse, RecipesSocialResponse
+        # ] = await asyncio.gather(
+        #     self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
+        #     self.reddit.get_reddit(sub_reddit="easyrecipes", sort=sort, limit=limit),
+        # )
+
+        # results: list[RecipeSocialResponse] = [
+        #     r for response in reddit_posts for r in response.results
+        # ]
+
+        # return RecipesSocialResponse(results=results)
+
+        result = (
+            await self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
         )
 
-        results: list[RecipeSocialResponse] = [
-            r for response in reddit_posts for r in response.results
-        ]
-
-        return RecipesSocialResponse(results=results)
+        return result[0]

@@ -2,12 +2,12 @@ import logging
 from pydantic import EmailStr, HttpUrl
 from app.core.config import settings
 from app.core.security import hash_password
-from app.domain.recipe import Recipe
-from app.domain.repository.recipe import RecipeRepositoryInterface
-from app.domain.user import User
+from app.domains.recipe import Recipe
+from app.domains.repositories.recipe import RecipeRepositoryInterface
+from app.domains.user import User
 
 from app.recipe_data import RECIPES
-from app.domain.repository.user import UserRepositoryInterface
+from app.domains.repositories.user import UserRepositoryInterface
 
 logger = logging.getLogger(__name__)
 

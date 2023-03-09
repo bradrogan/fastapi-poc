@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.db.seeder import init_db
 
 from app.db.session import SessionLocal
-from app.domain.repository.recipe import RecipeDBRepository
-from app.domain.repository.user import UserDBRepository
+from app.domains.repositories.recipe import RecipeDBRepository
+from app.domains.repositories.user import UserDBRepository
 
 logging.basicConfig(level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)

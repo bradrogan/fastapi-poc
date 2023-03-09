@@ -6,7 +6,7 @@ from app.dto.user import (
     UserLoginResponse,
     UserResponse,
 )
-from app.service.user import UserService, get_current_user, is_superuser
+from app.services.user import UserService, get_current_user, is_superuser
 
 user_router: APIRouter = APIRouter(tags=["users"])
 

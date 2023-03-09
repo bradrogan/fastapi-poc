@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 import httpx
-from app.domain.recipe import RedditSort
+from app.domains.recipe import RedditSort
 from app.dto.recipe import RecipeSocialResponse, RecipesSocialResponse
 
 

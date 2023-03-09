@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 
@@ -10,11 +10,9 @@ from app.domains.user import User
 
 
 class RecipeRepositoryInterface(ABC):
-    @abstractmethod
     def get_by_id(self, recipe_id: int) -> Recipe | None:
         ...
 
-    @abstractmethod
     def all(
         self,
         limit: int | None = None,
@@ -22,15 +20,12 @@ class RecipeRepositoryInterface(ABC):
     ) -> Recipes | None:
         ...
 
-    @abstractmethod
     def get_user_recipes(self, user: User) -> Recipes | None:
         ...
 
-    @abstractmethod
     def create(self, recipe: Recipe) -> Recipe:
         ...
 
-    @abstractmethod
     def search(
         self,
         keyword: str,

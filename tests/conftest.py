@@ -1,10 +1,11 @@
-from typing import Generator
-from unittest.mock import AsyncMock, MagicMock
+from typing import Callable, Generator, Type
 from fastapi.testclient import TestClient
-from pydantic import EmailStr, HttpUrl
+from pydantic import EmailStr
 import pytest
-from app.clients.reddit import RedditRecipeClient
-from app.dto.recipe import RecipeSocialResponse, RecipesSocialResponse
+from app.clients.reddit import (
+    RedditRecipeClient,
+    RedditRecipeClientInterface,
+)
 from app.dto.user import UserResponse
 from app.main import app
 from app.services.user import get_current_user
@@ -20,24 +21,12 @@ def mock_get_current_user() -> UserResponse:
     )
 
 
-async def override_reddit_dependency() -> MagicMock:
-    mock: AsyncMock = AsyncMock()
-    reddit_stub: RecipesSocialResponse = RecipesSocialResponse(
-        results=[
-            RecipeSocialResponse(
-                title="test",
-                score=100,
-                url=HttpUrl(url="https://example.com", scheme="https"),
-            ),
-        ]
-    )
-    mock.get_reddit.return_value = reddit_stub
-    return mock
-
-
 @pytest.fixture
-def mock_reddit() -> None:
-    app.dependency_overrides[RedditRecipeClient] = override_reddit_dependency
+def mock_reddit() -> Callable[[Type[RedditRecipeClientInterface]], None]:
+    def _method(mock: Type[RedditRecipeClientInterface]) -> None:
+        app.dependency_overrides[RedditRecipeClient] = mock
+
+    return _method
 
 
 @pytest.fixture
@@ -46,7 +35,7 @@ def mock_auth() -> None:
 
 
 @pytest.fixture
-def test_app(mock_reddit) -> Generator[TestClient, None, None]:
-    with TestClient(app) as client:
+def test_app() -> Generator[TestClient, None, None]:
+    with TestClient(app=app) as client:
         yield client
         app.dependency_overrides = {}

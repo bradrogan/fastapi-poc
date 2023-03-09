@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import Depends
 from app.domains.recipe import Recipe, Recipes, RedditSort
 from app.domains.repositories.recipe import (
@@ -7,6 +8,7 @@ from app.domains.repositories.recipe import (
 from app.dto.recipe import (
     RecipeCreateRequest,
     RecipeResponse,
+    RecipeSocialResponse,
     RecipesResponse,
     RecipesSocialResponse,
 )
@@ -52,21 +54,15 @@ class RecipeService:
         sort: RedditSort = RedditSort.TOP,
         limit: int = 3,
     ) -> RecipesSocialResponse:
-        # reddit_posts: tuple[
-        #     RecipesSocialResponse, RecipesSocialResponse
-        # ] = await asyncio.gather(
-        #     self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
-        #     self.reddit.get_reddit(sub_reddit="easyrecipes", sort=sort, limit=limit),
-        # )
-
-        # results: list[RecipeSocialResponse] = [
-        #     r for response in reddit_posts for r in response.results
-        # ]
-
-        # return RecipesSocialResponse(results=results)
-
-        result = (
-            await self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
+        reddit_posts: tuple[
+            RecipesSocialResponse, RecipesSocialResponse
+        ] = await asyncio.gather(
+            self.reddit.get_reddit(sub_reddit="recipes", sort=sort, limit=limit),
+            self.reddit.get_reddit(sub_reddit="easyrecipes", sort=sort, limit=limit),
         )
 
-        return result[0]
+        results: list[RecipeSocialResponse] = [
+            r for response in reddit_posts for r in response.results
+        ]
+
+        return RecipesSocialResponse(results=results)
